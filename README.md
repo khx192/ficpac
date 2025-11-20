@@ -1,7 +1,7 @@
-ficpac
+FicPac
 ======
 
-Tic-Tac-Toe game in Free Pascal.
+Tic-Tac-Toe game written in Free Pascal.
 
 Quick Start
 -----------
