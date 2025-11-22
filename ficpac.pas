@@ -87,18 +87,126 @@ begin
 	check_win := ' ';
 end;
 
+function game_over(game_board: Board; var winner: char): boolean;
+begin
+	winner := check_win(game_board);
+	game_over := (winner <> ' ') or board_full(game_board);
+end;
+
+function calc_move(game_board: Board; depth: integer; bot_sign: char; player: char): integer;
+var
+	i: integer;
+	j: integer;
+	winner: char;
+	best_val: integer;
+	curr_val: integer;
+begin
+	winner := check_win(game_board);
+
+	if winner = bot_sign then
+		exit(10 - depth)
+	else if winner = opposite_player(bot_sign) then
+		exit(depth - 10)
+	else if board_full(game_board) then
+		exit(0);
+
+	if player = bot_sign then
+		best_val := -11
+	else
+		best_val := 11;
+
+	for i := 0 to 2 do
+	begin
+		for j := 0 to 2 do
+		begin
+			if not cell_empty(game_board, i * 3 + j) then
+				continue;
+
+			game_board[i][j] := player;
+			curr_val := calc_move(game_board, depth + 1, bot_sign, opposite_player(player));
+			game_board[i][j] := ' ';
+
+			if (player = bot_sign) and (curr_val > best_val) or (player <> bot_sign) and (curr_val < best_val) then
+				best_val := curr_val;
+		end;
+	end;
+
+	calc_move := best_val;
+end;
+
+function bot_move(game_board: Board; bot_sign: char): integer;
+var
+	i: integer;
+	j: integer;
+	best_val: integer;
+	curr_val: integer;
+	best_move: integer;
+begin
+	best_val := -11;
+
+	for i := 0 to 2 do
+	begin
+		for j := 0 to 2 do
+		begin
+			if not cell_empty(game_board, i * 3 + j) then
+				continue;
+
+			game_board[i][j] := bot_sign;
+			curr_val := calc_move(game_board, 0, bot_sign, opposite_player(bot_sign));
+			game_board[i][j] := ' ';
+
+			if curr_val > best_val then
+			begin
+				best_val := curr_val;
+				best_move := i * 3 + j;
+			end;
+		end;
+	end;
+
+	bot_move := best_move;
+end;
+
+label
+	again;
 var
 	game_board: Board;
 	winner: char;
 	curr_player: char;
 	curr_index: integer;
+	bot_mode: boolean;
+	i: integer;
 begin
+	bot_mode := true;
 	curr_player := 'x';
 	init_board(game_board);
 
-	{$I-}
-	while not board_full(game_board) do
+	for i := 1 to ParamCount do
+		if (ParamStr(i) = '-p') or (ParamStr(i) = '--player') then
+		begin
+			bot_mode := false;
+			break;
+		end;
+
+	if bot_mode then
 	begin
+		randomize;
+		if random(2) = 0 then
+			curr_player := 'o';
+	end;
+
+	{$I-}
+	while not game_over(game_board, winner) do
+	begin
+		if bot_mode and (curr_player = 'o') then
+		begin
+			curr_index := bot_move(game_board, opposite_player(curr_player));
+			game_board[curr_index div 3][curr_index mod 3] := opposite_player(curr_player);
+
+			if game_over(game_board, winner) then
+				break;
+		end;
+
+again:
 		writeln();
 		draw_board(game_board);
 		write(curr_player, ' -> ');
@@ -107,29 +215,35 @@ begin
 		if (IOResult <> 0) or (curr_index > 8) or (curr_index < 0) then
 		begin
 			writeln('Invalid move!');
-			continue;
+			goto again;
 		end;
 
 		if not cell_empty(game_board, curr_index) then
 		begin
 			writeln('Cell is already taken!');
-			continue;
+			goto again;
 		end;
 
 		game_board[curr_index div 3][curr_index mod 3] := curr_player;
 
-		winner := check_win(game_board);
-		writeln('[DEBUG] check_win -> ', winner);
-		if winner <> ' ' then
-			break;
+		if bot_mode and (curr_player = 'x') and not board_full(game_board) then
+		begin
+			curr_index := bot_move(game_board, opposite_player(curr_player));
+			game_board[curr_index div 3][curr_index mod 3] := opposite_player(curr_player);
+		end;
 
-		curr_player := opposite_player(curr_player);
+		if not bot_mode then
+			curr_player := opposite_player(curr_player);
 	end;
 
 	writeln();
 	draw_board(game_board);
 
-	if winner <> ' ' then
+	if bot_mode and (winner = curr_player) then
+		writeln('You won')
+	else if bot_mode and (winner = opposite_player(curr_player)) then
+		writeln('You lost')
+	else if winner <> ' ' then
 		writeln(winner, ' won')
 	else
 		writeln('Draw');
