@@ -1,7 +1,7 @@
 FicPac
 ======
 
-Tic-Tac-Toe game written in Free Pascal.
+Tic-Tac-Toe game written in Free Pascal. Bot is implemented using [Minimax](https://en.wikipedia.org/wiki/Minimax) algorithm.
 
 Compile
 -----------
