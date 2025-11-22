@@ -3,8 +3,13 @@ FicPac
 
 Tic-Tac-Toe game written in Free Pascal.
 
-Quick Start
+Compile
 -----------
 
 	$ fpc ficpac.pas
-	$ ./ficpac
+
+Usage
+-----
+
+* `$ ./ficpac` - Player VS Bot
+* `$ ./ficpac -p` (or `$ ./ficpac --player`) - Player VS Player
