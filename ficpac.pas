@@ -3,7 +3,7 @@ program ficpac;
 type
 	Board = array[0..2, 0..2] of char;
 
-procedure clean_board(var game_board: Board);
+procedure init_board(var game_board: Board);
 var
 	i: integer;
 	j: integer;
@@ -35,12 +35,12 @@ begin
 	end;
 end;
 
-procedure switch_player(var player: char);
+function opposite_player(player: char): char;
 begin
 	if player = 'x' then
-		player := 'o'
+		opposite_player := 'o'
 	else if player = 'o' then
-		player := 'x';
+		opposite_player := 'x';
 end;
 
 function cell_empty(game_board: Board; index: integer): boolean;
@@ -51,43 +51,53 @@ begin
 		cell_empty := false;
 end;
 
-function check_win(game_board: Board; player: char): boolean;
+function board_full(game_board: Board): boolean;
+var
+	i: integer;
+	j: integer;
+begin
+	board_full := false;
+
+	for i := 0 to 2 do
+		for j := 0 to 2 do
+			if cell_empty(game_board, i * 3 + j) then
+				exit;
+
+	board_full := true;
+end;
+
+function check_win(game_board: Board): char;
 var
 	i: integer;
 begin
-	check_win := true;
+	for i := 0 to 2 do
+		if (game_board[i][0] <> ' ') and (game_board[i][0] = game_board[i][1]) and (game_board[i][0] = game_board[i][2]) then
+			exit(game_board[i][0]);
 
 	for i := 0 to 2 do
-		if (game_board[i][0] = game_board[i][1]) and (game_board[i][0] = game_board[i][2]) and (game_board[i][0] = player) then
-			exit;
+		if (game_board[0][i] <> ' ') and (game_board[0][i] = game_board[1][i]) and (game_board[0][i] = game_board[2][i]) then
+			exit(game_board[0][i]);
 
-	for i := 0 to 2 do
-		if (game_board[0][i] = game_board[1][i]) and (game_board[0][i] = game_board[2][i]) and (game_board[0][i] = player) then
-			exit;
+	if (game_board[0][0] <> ' ') and (game_board[0][0] = game_board[1][1]) and (game_board[0][0] = game_board[2][2]) then
+		exit(game_board[0][0]);
 
-	if (game_board[0][0] = game_board[1][1]) and (game_board[0][0] = game_board[2][2]) and (game_board[0][0] = player) then
-		exit;
+	if (game_board[2][0] <> ' ') and (game_board[2][0] = game_board[1][1]) and (game_board[2][0] = game_board[0][2]) then
+		exit(game_board[2][0]);
 
-	if (game_board[2][0] = game_board[1][1]) and (game_board[2][0] = game_board[0][2]) and (game_board[2][0] = player) then
-		exit;
-
-	check_win := false;
+	check_win := ' ';
 end;
 
 var
 	game_board: Board;
-	win_state: boolean;
-	cells_left: integer;
+	winner: char;
 	curr_player: char;
 	curr_index: integer;
 begin
-	win_state := false;
-	cells_left := 9;
 	curr_player := 'x';
-	clean_board(game_board);
+	init_board(game_board);
 
 	{$I-}
-	while cells_left > 0 do
+	while not board_full(game_board) do
 	begin
 		writeln();
 		draw_board(game_board);
@@ -108,20 +118,19 @@ begin
 
 		game_board[curr_index div 3][curr_index mod 3] := curr_player;
 
-		if check_win(game_board, curr_player) then
-		begin
-			win_state := true;
+		winner := check_win(game_board);
+		writeln('[DEBUG] check_win -> ', winner);
+		if winner <> ' ' then
 			break;
-		end;
 
-		switch_player(curr_player);
-		cells_left -= 1;
+		curr_player := opposite_player(curr_player);
 	end;
 
 	writeln();
 	draw_board(game_board);
-	if win_state then
-		writeln(curr_player, ' won')
+
+	if winner <> ' ' then
+		writeln(winner, ' won')
 	else
 		writeln('Draw');
 end.
