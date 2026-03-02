@@ -166,6 +166,14 @@ begin
 	bot_move := best_move;
 end;
 
+procedure help;
+begin
+	writeln('Usage:');
+	writeln('    ficpac                  PLayer VS Bot.');
+	writeln('    ficpac [-p, --player]   Player VS Player.');
+	writeln('    ficpac [-h, --help]     Print this message.');
+end;
+
 label
 	again;
 var
@@ -174,18 +182,27 @@ var
 	curr_player: char;
 	curr_index: integer;
 	bot_mode: boolean;
-	i: integer;
 begin
 	bot_mode := true;
 	curr_player := 'x';
-	init_board(game_board);
 
-	for i := 1 to ParamCount do
-		if (ParamStr(i) = '-p') or (ParamStr(i) = '--player') then
-		begin
-			bot_mode := false;
-			break;
-		end;
+	if (ParamCount = 1) and (ParamStr(1) = '-h') or (ParamStr(1) = '--help') then
+	begin
+		help;
+		halt;
+	end
+	else if (ParamCount = 1) and (ParamStr(1) = '-p') or (ParamStr(1) = '--player') then
+	begin
+		bot_mode := false;
+	end
+	else if (ParamCount <> 0) then
+	begin
+		writeln('Unknown option.');
+		help;
+		halt;
+	end;
+
+	init_board(game_board);
 
 	if bot_mode then
 	begin
