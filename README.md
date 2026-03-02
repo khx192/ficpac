@@ -11,5 +11,7 @@ Compile
 Usage
 -----
 
-* `$ ./ficpac` - Player VS Bot
-* `$ ./ficpac -p` (or `$ ./ficpac --player`) - Player VS Player
+	Usage:
+	    ficpac                  PLayer VS Bot.
+	    ficpac [-p, --player]   Player VS Player.
+	    ficpac [-h, --help]     Print this message.
