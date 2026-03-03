@@ -6,12 +6,16 @@ Tic-Tac-Toe game written in Free Pascal. Bot is implemented using [Minimax](http
 Compile
 -------
 
-	$ fpc ficpac.pas
+```
+$ fpc ficpac.pas
+```
 
 Usage
 -----
 
-	Usage:
-	    ficpac                  PLayer VS Bot.
-	    ficpac [-p, --player]   Player VS Player.
-	    ficpac [-h, --help]     Print this message.
+```
+Usage:
+    ficpac                  PLayer VS Bot.
+    ficpac [-p, --player]   Player VS Player.
+    ficpac [-h, --help]     Print this message.
+```
